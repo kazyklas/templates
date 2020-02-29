@@ -1,0 +1,53 @@
+# Install python3 if not installed
+- name: Check if Python3 is installed 
+  raw: test -e /usr/bin/python3
+  failed_when: false
+  changed_when: false
+  register: python_check_is_installed
+
+- name: Install Python3 in the container
+  raw: apt-get -y update && apt-get install -y python3
+  when: python_check_is_installed.rc != 0
+
+# Synchronize and copy module for copies
+- name: Synchronize some folders
+  synchronize:
+    src: "{{ SYNC_SOURCE_PATH }}"
+    dst: "{{ SYNC_DESTINATION_PATH }}"
+
+- name: Copy some folders
+  copy:
+    src: "{{ COPY_SOURCE_PATH }}"
+    dest: "{{ COPY_DESTIONATION_PATH }}"
+    owner: root
+    group: root
+    mode: 0600
+
+
+# Intallation of the packages and removing unnecesary stuff
+- name: Install a list of packages
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - docker.io
+
+- name: Remove dependencies that are no longer required
+  apt:
+    autoremove: yes
+
+- name: Remove useless packages from the cache
+  apt:
+    autoclean: yes
+
+# Set some cron job
+- name: Ensure a job that runs at 2 and 5 exists. Creates an entry like "0 5,2 * * ls -alh > /dev/null"
+  cron:
+    name: "check dirs"
+    minute: "0"
+    hour: "5,2"
+    job: "ls -alh > /dev/null"
+
+# Running commands
+- name: Run some specific command
+  raw: echo "Hello world"

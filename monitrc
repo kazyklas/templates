@@ -1,0 +1,106 @@
+###############################################################################
+## Monit control file
+###############################################################################
+
+ 
+# eventqueue means that it will storre alerts and after mail server will be on it will send them
+set eventqueue
+      basedir /var/lib/monit/events # set the base directory where events will be stored
+      slots 100                     # optionally limit the queue size
+
+# setting the mmonit collector for monitoring on web interface
+set mmonit http://admin:swordfish@localhost:8080/collector
+      with timeout 3 seconds              # Default timeout is 5 seconds
+      and register without credentials     # Don't register credentials
+
+# start running monit on the port 2812
+set httpd port 2812
+     allow localhost               # allow localhost to connect to the server and
+     allow datamole:Datamole1      # require user 'admin' with password 'monit'
+     allow 10.7.31.34
+     allow 127.0.0.1
+     allow 10.7.31.202
+
+# check services at 2-minute intervals
+set daemon 120            
+
+# setting log file
+set log /var/log/monit.log
+
+# set special file to hold process id
+set idfile /var/lib/monit/id	   
+
+# set the state file of the monit
+set statefile /var/lib/monit/state 
+
+##############################################################################
+# check drives and their temperature
+###############################################################################
+check program SSD-A-Temp with path /opt/scripts/hdtempa.sh 
+    every 5 cycles
+    if status > 50 then alert
+    group health
+
+check program SSD-B-Temp with path /opt/scripts/hdtempb.sh
+    every 5 cycles
+    if status > 50 then alert
+    group health
+
+check program SSD-A-Health with path /opt/scripts/hdhealtha.sh
+    every 120 cycles
+    if status != 1 then alert
+    group health
+
+check program SSD-B-Health with path /opt/scripts/hdhealthb.sh
+    every 120 cycles
+    if status != 1 then alert
+    group health
+
+check filesystem rootfs with path /dev/md0
+  if space usage > 80% for 5 times within 15 cycles then unmonitor
+
+
+# check if the docker is running
+check process docker with pidfile /var/run/docker.pid
+  start program = "/etc/init.d/docker start" with timeout 60 seconds
+  stop program  = "/etc/init.d/docker stop"
+
+# check how the system is performing 
+check system $HOST
+  if loadavg (1min) > 4 then alert
+  if loadavg (5min) > 2 then alert
+  if cpu usage > 95% for 10 cycles then alert
+  if memory usage > 75% then alert
+  if swap usage > 25% then alert
+
+
+##############################################################################
+# check changes in files
+##############################################################################
+check file passwd-file with path /etc/passwd
+  if failed checksum and 
+    expect the sum 289dd7eac581a76a47d3f0937bf7ecac then alert
+
+check file ssh-keys with path /root/.ssh/authorized_keys
+  if failed checksum and 
+    expect the sum ad170e70055b7fa3f3bb33713278e08a then alert
+
+check file shadow-file with path /etc/shadow
+  if failed checksum and 
+    expect the sum 8825f3414c93d0aa42c56cea95222d22 then alert
+
+check file dns-file with path /etc/resolv.conf
+  if failed checksum and 
+    expect the sum 191437998c4e718df561ddf46c4d5744 then alert
+
+
+###############################################################################
+## Includes
+###############################################################################
+
+## It is possible to include additional configuration parts from other files or
+## directories.
+
+include /opt/conf.d/*
+include /opt/conf-enabled/*
+

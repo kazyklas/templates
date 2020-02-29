@@ -1,0 +1,24 @@
+#!/bin/bash
+###################################
+# Creator of the scripti {{ USER }}
+# Descirpiton:
+# {{ SHORD_DESCRIPTION }}
+###################################
+
+set -eufo pipefail
+
+# Variables definition
+PWD=$(pwd)
+
+
+# Check the input parameters
+if [ $# -eq {{ COUNT_INPUT_PARAMETERS }} ]; then
+    echo "usage: bash {{ SCRIPT_NAME }}  <PARAMS>"
+    exit
+fi
+
+
+
+{% INSERT %}
+
+

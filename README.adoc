@@ -1,0 +1,45 @@
+= Cookiecutters
+
+This repository will hold some of the mine templates. It is using a program as the runer to maintain the templates. It can be found at: https://gitlab.datamole.cz/Core/Templates/Cookiecutters.
+
+== Instalation
+
+You can follow the description on how to install the program link:https://github.com/bbugyi200/cookie[here].
+Or you can follow this commands:
+
+----
+git clone https://github.com/bbugyi200/cookie 
+cd cookie
+sudo make install
+----
+
+It should create the this directory: `/home/{USER}/.cookiecutters`.
+Now you can chage to this directory: `cd /home/{USER}/.cookicutters`.
+And now clone mine templates to this directory: `git clone https://gitlab.datamole.cz/tklas/CookieThinkg`
+
+
+== Operating with cookie
+
+=== Editing 
+
+To edit simply write the command below. It will start your default editor for editing the template.
+
+----
+cookie -e <template>
+----
+
+To see what else can you do check the program repository that was mentioned before.
+
+
+=== Creating new file
+
+To create new file with the certain template just run this command.
+
+----
+cookie <template> <new_file>
+----
+
+
+== More
+
+For more information check this repository link:https://github.com/bbugyi200/cookie[here].
